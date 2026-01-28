@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Wizard Farm</title>
+
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        background: #999999;
+      }
+      canvas {
+        display: block;
+        margin: 0 auto;
+      }
+    </style>
+  </head>
+
+  <body>
+    <!-- Load Phaser -->
+    <script src="https://cdn.jsdelivr.net/npm/phaser@3/dist/phaser.js"></script>
+
+    <!-- Load your game -->
+    <script type="module" src="src/scenes/BootScene.js"></script>
+    <script type="module" src="src/scenes/PreloadScene.js"></script>
+    <script type="module" src="src/scenes/UIScene.js"></script>
+    <script type="module" src="src/scenes/FarmScene.js"></script>
+    <script type="module" src="src/main.js"></script>
+
+  </body>
+</html>
