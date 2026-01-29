@@ -14,6 +14,7 @@ export default class FarmScene extends Phaser.Scene {
 
     create() {
         console.log("FarmScene started...");
+        this.input.setPollAlways();
         this.tileSize = 16;
         this.gridWidth = 30;
         this.gridHeight = 100;
@@ -22,13 +23,15 @@ export default class FarmScene extends Phaser.Scene {
         this.grid = new Grid(
             this,
             0, 0, 
-            this.gridWidth, this.gridHeight,
+            this.gridHeight, this.gridWidth,
             this.tileSize,
             "grass",
             allowedFrames
         )
 
-        this.grid.highlightTile(5,5, 0xff0000, 1);
+        this.grid.enableHover();
+
+
 
         this.input.on("pointerdown", pointer =>{
             const x = Math.floor(pointer.x / this.tileSize);

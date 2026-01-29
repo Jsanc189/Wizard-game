@@ -22,9 +22,9 @@ export default class Grid {
 
     //creates the grid of tiles
     createGrid() {
-        for (let i = 0; i < this.rows; i++) {
+        for (let i = 0; i < this.cols; i++) {
             this.grid[i] = [];
-            for (let j = 0; j < this.cols; j++) {
+            for (let j = 0; j < this.rows; j++) {
                 const frame = this.allowedFrames[Phaser.Math.Between(0, this.allowedFrames.length - 1)];
                 const tile = this.scene.add.image(
                     this.x + i * this.tileSize,
@@ -69,4 +69,23 @@ export default class Grid {
     clearHighlight() {
         this.highlightGraphics.clear();
     }
+
+    //enables hover effect to highlight tiles under the pointer
+    enableHover() {
+        this.scene.input.on("pointermove", pointer => {
+            const col = Math.floor(pointer.worldX / this.tileSize);
+            const row = Math.floor(pointer.worldY / this.tileSize);
+
+            if(
+                col < 0 || col >= this.cols ||
+                row < 0 || row >= this.rows
+            ) {
+                this.clearHighlight();
+                return;
+            }
+            this.highlightTile(col,row, 0xff0000, 1);
+        });
+    }
+
+    
 }
