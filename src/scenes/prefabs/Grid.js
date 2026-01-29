@@ -4,7 +4,9 @@ Description:  Grid prefab for creating a grid layout in the game scene.
 */
 
 export default class Grid {
-    constructor(scene, x, y, rows, cols, tileSize, grassTextureKey, dirtTextureKey, allowedGrassFrames, allowedDirtFrames) {
+    constructor(scene, x, y, rows, cols, tileSize, 
+                grassTextureKey, dirtTextureKey, wateredTextureKey, 
+                allowedGrassFrames, allowedDirtFrames, allowedWateredFrames) {
         this.scene = scene;
         this.x = x;
         this.y = y;
@@ -13,8 +15,10 @@ export default class Grid {
         this.tileSize = tileSize;
         this.grassTextureKey = grassTextureKey;
         this.dirtTextureKey = dirtTextureKey;
+        this.wateredTextureKey = wateredTextureKey;
         this.allowedGrassFrames = allowedGrassFrames;
         this.allowedDirtFrames = allowedDirtFrames;
+        this.allowedWateredFrames = allowedWateredFrames
         this.highlightGraphics = this.scene.add.graphics();
         this.highlightGraphics.setDepth(10);
         
@@ -38,7 +42,8 @@ export default class Grid {
                 this.grid[i][j] = {
                     tile,
                     plant:null,
-                    isTilled:false
+                    isTilled:false,
+                    isWatered:false
                 }
             }
         }
@@ -65,7 +70,7 @@ export default class Grid {
         tileData.isTilled = true;
     }
 
-    // //enables hoeing interaction on the grid
+    //enables hoeing interaction on the grid
     enableHoeing() {
         this.scene.input.on("pointerdown", pointer => {
             const col = Math.floor((pointer.worldX - this.x) / this.tileSize);
@@ -79,6 +84,20 @@ export default class Grid {
             }
             this.hoeTile(col, row);
         });
+    }
+
+    //waters the tile at (col, row)
+    waterTile(col, row) {
+        const tileData = this.getTile(col,row);
+        if(!tileData) return;
+
+        if(!tileData.isTilled) return; // Can't water until tilled
+
+        if(tileData.isWatered) return; // Already watered
+        const wateredFrames = this.allowedWateredFrames;
+        const frame = wateredFrames[Phaser.Math.Between(0, wateredFrames.length - 1)];
+        tileData.tile.setTexture(this.wateredTextureKey, frame);
+        tileData.isWatered = true;
     }
 
     //highlights a tile at (col, row) with specified color and line width

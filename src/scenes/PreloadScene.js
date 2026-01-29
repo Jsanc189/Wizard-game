@@ -32,6 +32,11 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 16
         });
 
+        this.load.spritesheet("watered_dirt", "./assets/tiles/Watered_Soil.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
 
     }
 

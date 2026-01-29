@@ -20,6 +20,7 @@ export default class FarmScene extends Phaser.Scene {
         this.gridHeight = 100;
         const allowedGrassFrames = [55,56,57,58,59];
         const allowedDirtFrames = [55,56,57,58,59];
+        const allowedWateredDirtFrames = [55,56,57,58,59];
 
         this.grid = new Grid(
             this,
@@ -28,8 +29,10 @@ export default class FarmScene extends Phaser.Scene {
             this.tileSize,
             "grass",
             "dirt",
+            "watered_dirt",
             allowedGrassFrames,
-            allowedDirtFrames
+            allowedDirtFrames,
+            allowedWateredDirtFrames
         )
 
         this.grid.enableHover();
