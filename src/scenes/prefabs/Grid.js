@@ -13,11 +13,14 @@ export default class Grid {
         this.tileSize = tileSize;
         this.textureKey = textureKey;
         this.allowedFrames = allowedFrames;
+        this.highlightGraphics = this.scene.add.graphics();
+        this.highlightGraphics.setDepth(10);
         
         this.grid = [];
         this.createGrid();
     }
 
+    //creates the grid of tiles
     createGrid() {
         for (let i = 0; i < this.rows; i++) {
             this.grid[i] = [];
@@ -38,6 +41,7 @@ export default class Grid {
         }
     }
 
+    //returns tile data at (col, row)
     getTile(col,row) {
         if(row < 0 || row >= this.rows ||col < 0 || col >= this.cols) {
             return null;
@@ -45,17 +49,24 @@ export default class Grid {
         return this.grid[col][row];
     }
 
-    highlightTile(col,row, color = 0x000000) {
+    //highlights a tile at (col, row) with specified color and line width
+    highlightTile(col,row, color = 0x000000, lineWidth = 2) {
         const tileData = this.getTile(col,row);
         if(!tileData) return;
-        tileData.tile.setTint(color);
+        const tile = tileData.tile;
+
+        this.highlightGraphics.clear();
+        this.highlightGraphics.lineStyle(lineWidth, color, 1);
+        this.highlightGraphics.strokeRect(
+            tile.x,
+            tile.y,
+            this.tileSize,
+            this.tileSize
+        )
     }
 
+    //clears any existing highlights
     clearHighlight() {
-        for (let y = 0; y < this.height; y++) {
-            for (let x = 0; x < this.width; x++) {
-                this.grid[y][x].tile.clearTint();
-            }
-        }
+        this.highlightGraphics.clear();
     }
 }

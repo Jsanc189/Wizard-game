@@ -28,7 +28,7 @@ export default class FarmScene extends Phaser.Scene {
             allowedFrames
         )
 
-        this.grid.highlightTile(5,10);
+        this.grid.highlightTile(5,5, 0xff0000, 1);
 
         this.input.on("pointerdown", pointer =>{
             const x = Math.floor(pointer.x / this.tileSize);
