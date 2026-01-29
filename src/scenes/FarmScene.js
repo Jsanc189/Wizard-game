@@ -18,7 +18,8 @@ export default class FarmScene extends Phaser.Scene {
         this.tileSize = 16;
         this.gridWidth = 30;
         this.gridHeight = 100;
-        const allowedFrames = [55,56,57,58,59,60];
+        const allowedGrassFrames = [55,56,57,58,59];
+        const allowedDirtFrames = [55,56,57,58,59];
 
         this.grid = new Grid(
             this,
@@ -26,40 +27,19 @@ export default class FarmScene extends Phaser.Scene {
             this.gridHeight, this.gridWidth,
             this.tileSize,
             "grass",
-            allowedFrames
+            "dirt",
+            allowedGrassFrames,
+            allowedDirtFrames
         )
 
         this.grid.enableHover();
 
-
-
-        this.input.on("pointerdown", pointer =>{
-            const x = Math.floor(pointer.x / this.tileSize);
-            const y = Math.floor(pointer.y / this.tileSize);
-
-            if (this.isInBounds(x,y)) {
-                this.plantAt(x,y);
-            }
+        this.input.on("pointerup", () => {
+            this.grid.clearHighlight();
         });
+
+        this.grid.enableHoeing();
     }
 
-    isInBounds(x,y) {
-        return (
-            x>=0 && x < this.gridWidth &&
-            y>=0 && y < this.gridHeight
-        );
-    }
-
-    plantAt(x, y) {
-        if(this.grid[y][x]) return; // Already a plant here
-
-        const plant = this.add.image(
-            x*this.tileSize,
-            y*this.tileSize,
-            "plant_1_1"
-        );
-        plant.setOrigin(0);
-        this.grid[y][x] = plant;
-    }
 }
 

@@ -25,7 +25,14 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.spritesheet("grass", "./assets/tiles/Grass_Tile_layers2.png", {
             frameWidth: 16,
             frameHeight: 16
-        })
+        });
+
+        this.load.spritesheet("dirt", "./assets/tiles/Soil_Ground_Tiles.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
+
     }
 
     create() {

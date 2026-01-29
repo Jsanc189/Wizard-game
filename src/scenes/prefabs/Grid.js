@@ -4,15 +4,17 @@ Description:  Grid prefab for creating a grid layout in the game scene.
 */
 
 export default class Grid {
-    constructor(scene, x, y, rows, cols, tileSize, textureKey, allowedFrames) {
+    constructor(scene, x, y, rows, cols, tileSize, grassTextureKey, dirtTextureKey, allowedGrassFrames, allowedDirtFrames) {
         this.scene = scene;
         this.x = x;
         this.y = y;
         this.rows = rows;
         this.cols = cols;
         this.tileSize = tileSize;
-        this.textureKey = textureKey;
-        this.allowedFrames = allowedFrames;
+        this.grassTextureKey = grassTextureKey;
+        this.dirtTextureKey = dirtTextureKey;
+        this.allowedGrassFrames = allowedGrassFrames;
+        this.allowedDirtFrames = allowedDirtFrames;
         this.highlightGraphics = this.scene.add.graphics();
         this.highlightGraphics.setDepth(10);
         
@@ -25,17 +27,18 @@ export default class Grid {
         for (let i = 0; i < this.cols; i++) {
             this.grid[i] = [];
             for (let j = 0; j < this.rows; j++) {
-                const frame = this.allowedFrames[Phaser.Math.Between(0, this.allowedFrames.length - 1)];
+                const frame = this.allowedGrassFrames[Phaser.Math.Between(0, this.allowedGrassFrames.length - 1)];
                 const tile = this.scene.add.image(
                     this.x + i * this.tileSize,
                     this.y + j * this.tileSize,
-                    this.textureKey,
+                    this.grassTextureKey,
                     frame
                 );
                 tile.setOrigin(0);
                 this.grid[i][j] = {
                     tile,
-                    plant:null
+                    plant:null,
+                    isTilled:false
                 }
             }
         }
@@ -47,6 +50,35 @@ export default class Grid {
             return null;
         }
         return this.grid[col][row];
+    }
+
+    //tills the tile at (col, row)
+    hoeTile(col, row) {
+        const tileData = this.getTile(col,row);
+        if(!tileData) return;
+
+        if(tileData.isTilled) return; // Already tilled
+
+        const tilledFrames = this.allowedDirtFrames;
+        const frame = tilledFrames[Phaser.Math.Between(0, tilledFrames.length - 1)];
+        tileData.tile.setTexture(this.dirtTextureKey, frame);
+        tileData.isTilled = true;
+    }
+
+    // //enables hoeing interaction on the grid
+    enableHoeing() {
+        this.scene.input.on("pointerdown", pointer => {
+            const col = Math.floor((pointer.worldX - this.x) / this.tileSize);
+            const row = Math.floor((pointer.worldY - this.y) / this.tileSize);
+
+            if(
+                col< 0 || col >= this.cols ||
+                row < 0 || row >= this.rows
+            ) {
+                return;
+            }
+            this.hoeTile(col, row);
+        });
     }
 
     //highlights a tile at (col, row) with specified color and line width
@@ -86,6 +118,8 @@ export default class Grid {
             this.highlightTile(col,row, 0xff0000, 1);
         });
     }
+
+
 
     
 }
