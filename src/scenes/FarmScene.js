@@ -19,12 +19,14 @@ export default class FarmScene extends Phaser.Scene {
         this.tileSize = 16;
         this.gridWidth = 29;
         this.gridHeight = 100;
+        const toolbarY = this.scale.height - 48;
         const allowedGrassFrames = [55,56,57,58,59];
         const allowedDirtFrames = [55,56,57,58,59];
         const allowedWateredDirtFrames = [55,56,57,58,59];
-        const toolBar = new ToolBar(this, 50,10, [
-            { tool: "hoe", textureKey: "ui", frame: 2 },
-            { tool: "water", textureKey: "ui", frame: 0 }
+        const toolBar = new ToolBar(this, 50, toolbarY, [
+            {bgTexture: "buttons", bgFrame: 6, tool: "water", textureKey: "ui", frame: 0, width: 32},
+            {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32},
+            {bgTexture: "buttons", bgFrame: 6, tool: "axe", textureKey: "ui", frame: 1, width: 32}
         ]);
 
         this.events.on("tool-changed", (tool) => {
