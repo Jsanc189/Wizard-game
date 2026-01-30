@@ -6,6 +6,7 @@ Art assets are made by cup Nooble https://cupnooble.itch.io/
 */
 
 import Grid from "./prefabs/Grid.js";
+import ToolBar from "../ui/ToolBar.js";
 
 export default class FarmScene extends Phaser.Scene {
     constructor() {
@@ -16,11 +17,20 @@ export default class FarmScene extends Phaser.Scene {
         console.log("FarmScene started...");
         this.input.setPollAlways();
         this.tileSize = 16;
-        this.gridWidth = 30;
+        this.gridWidth = 29;
         this.gridHeight = 100;
         const allowedGrassFrames = [55,56,57,58,59];
         const allowedDirtFrames = [55,56,57,58,59];
         const allowedWateredDirtFrames = [55,56,57,58,59];
+        const toolBar = new ToolBar(this, 50,10, [
+            { tool: "hoe", textureKey: "ui", frame: 2 },
+            { tool: "water", textureKey: "ui", frame: 0 }
+        ]);
+
+        this.events.on("tool-changed", (tool) => {
+            this.currentTool = tool;
+            console.log("Tool changed to:", tool);
+        });
 
         this.grid = new Grid(
             this,
@@ -34,6 +44,8 @@ export default class FarmScene extends Phaser.Scene {
             allowedDirtFrames,
             allowedWateredDirtFrames
         )
+
+
 
         this.grid.enableHover();
 

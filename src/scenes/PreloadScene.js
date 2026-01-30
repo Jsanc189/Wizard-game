@@ -22,6 +22,7 @@ export default class PreloadScene extends Phaser.Scene {
             loadingBar.destroy();
         });
 
+        //Load Ground textures
         this.load.spritesheet("grass", "./assets/tiles/Grass_Tile_layers2.png", {
             frameWidth: 16,
             frameHeight: 16
@@ -36,6 +37,12 @@ export default class PreloadScene extends Phaser.Scene {
             frameWidth: 16,
             frameHeight: 16
         });
+
+        //Load UI textures
+        this.load.spritesheet("ui", "./assets/ui/tools_and_materials.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        })
 
 
     }
