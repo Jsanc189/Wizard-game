@@ -19,6 +19,7 @@ export default class FarmScene extends Phaser.Scene {
         this.tileSize = 16;
         this.gridWidth = 29;
         this.gridHeight = 100;
+        this.currentTool = "water";
         const toolbarY = this.scale.height - 48;
         const allowedGrassFrames = [55,56,57,58,59];
         const allowedDirtFrames = [55,56,57,58,59];
@@ -47,16 +48,34 @@ export default class FarmScene extends Phaser.Scene {
             allowedWateredDirtFrames
         )
 
-
-
         this.grid.enableHover();
 
         this.input.on("pointerup", () => {
             this.grid.clearHighlight();
         });
 
-        this.grid.enableHoeing();
-    }
+        //this.grid.enableHoeing();
+        
+        this.input.on("pointerdown", (pointer) => {
+            const col = Math.floor(pointer.worldX / this.tileSize);
+            const row = Math.floor(pointer.worldY / this.tileSize);
 
+            if(
+                col < 0 || col >= this.grid.cols ||
+                row < 0 || row >= this.grid.rows
+            ) {
+                return;
+            }
+            switch(this.currentTool) {
+                case "hoe":
+                    this.grid.hoeTile(col, row);
+                    break; 
+                case "water":
+                    this.grid.waterTile(col, row);
+                    break;
+            }
+            
+        });
+    }
 }
 
