@@ -34,7 +34,7 @@ export default class FarmScene extends Phaser.Scene {
 
         //creates tilemap and grid
         this.input.setPollAlways();
-        this.tileSize = 16;
+        this.tileSize = 32;
         this.gridWidth = 29;
         this.gridHeight = 100;
         this.grid = new Grid(

@@ -39,6 +39,12 @@ export default class Grid {
                     frame
                 );
                 tile.setOrigin(0);
+                const frameWidth = tile.frame.width;
+                const frameHeight = tile.frame.height;
+                tile.setScale(
+                    this.tileSize / frameWidth,
+                    this.tileSize / frameHeight
+                );
                 this.grid[i][j] = {
                     tile,
                     plant:null,
