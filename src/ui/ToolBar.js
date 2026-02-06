@@ -41,12 +41,15 @@ export default class ToolBar {
                     Phaser.Geom.Rectangle.Contains
                 );
 
-                container.on("pointerdown", () => {
+                container.on("pointerdown", (pointer) => {
                     console.log(`${config.tool} button clicked`);
+                    pointer.event.stopPropagation();
                     this.setActive(container);
-                    this.scene.events.emit("tool-changed", config.tool);
-                }
-            );
+                    this.scene.events.emit("tool-changed",{
+                         tool: config.tool,
+                         energyCost: config.energyCost
+                });
+            });
 
             this.buttonsList.push(container);
         });

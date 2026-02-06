@@ -59,15 +59,16 @@ export default class Grid {
 
     //tills the tile at (col, row)
     hoeTile(col, row) {
+        console.log("hoeTile called:", col, row);
         const tileData = this.getTile(col,row);
-        if(!tileData) return;
+        if(!tileData) return false;
 
         if(tileData.isTilled) return; // Already tilled
 
-        const tilledFrames = this.allowedDirtFrames;
-        const frame = tilledFrames[Phaser.Math.Between(0, tilledFrames.length - 1)];
+        const frame = this.allowedDirtFrames[Phaser.Math.Between(0, this.allowedDirtFrames.length - 1)];
         tileData.tile.setTexture(this.dirtTextureKey, frame);
         tileData.isTilled = true;
+        return true;
     }
 
     //enables hoeing interaction on the grid
@@ -89,15 +90,16 @@ export default class Grid {
     //waters the tile at (col, row)
     waterTile(col, row) {
         const tileData = this.getTile(col,row);
-        if(!tileData) return;
+        if(!tileData) return false;
 
-        if(!tileData.isTilled) return; // Can't water until tilled
+        if(!tileData.isTilled) return false; // Can't water until tilled
 
-        if(tileData.isWatered) return; // Already watered
-        const wateredFrames = this.allowedWateredFrames;
-        const frame = wateredFrames[Phaser.Math.Between(0, wateredFrames.length - 1)];
+        if(tileData.isWatered) return false; // Already watered
+
+        const frame = this.allowedWateredFrames[Phaser.Math.Between(0, this.allowedWateredFrames.length - 1)];
         tileData.tile.setTexture(this.wateredTextureKey, frame);
         tileData.isWatered = true;
+        return true;
     }
 
     //highlights a tile at (col, row) with specified color and line width

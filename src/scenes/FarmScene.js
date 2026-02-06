@@ -22,13 +22,14 @@ export default class FarmScene extends Phaser.Scene {
         const allowedDirtFrames = [55,56,57,58,59];
         const allowedWateredDirtFrames = [55,56,57,58,59];
         const toolBar = new ToolBar(this, 50, toolbarY, [
-            {bgTexture: "buttons", bgFrame: 6, tool: "water", textureKey: "ui", frame: 0, width: 32},
-            {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32},
-            {bgTexture: "buttons", bgFrame: 6, tool: "axe", textureKey: "ui", frame: 1, width: 32}
+            {bgTexture: "buttons", bgFrame: 6, tool: "water", textureKey: "ui", frame: 0, width: 32, energyCost: 5},
+            {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32, energyCost: 10},
+            {bgTexture: "buttons", bgFrame: 6, tool: "axe", textureKey: "ui", frame: 1, width: 32, energyCost: 15}
         ]);
-        this.events.on("tool-changed", (tool) => {
-            this.currentTool = tool;
-            console.log("Tool changed to:", tool);
+        this.events.on("tool-changed", (data) => {
+            this.currentTool = data.tool;
+            this.currentToolEnergyCost = data.energyCost;
+            console.log("Tool changed to:", data.tool, "with energy cost:", data.energyCost);
         });
 
         //creates tilemap and grid
@@ -52,12 +53,16 @@ export default class FarmScene extends Phaser.Scene {
 
         this.input.on("pointerup", () => {
             this.grid.clearHighlight();
-
-
         });
         
         //ties toolbar to grid interactions
-        this.input.on("pointerdown", (pointer) => {
+        this.input.on("pointerdown", (pointer, currentlyOver) => {
+            //ignore clicks that hit any ui objects
+            if(currentlyOver.some(obj => obj.depth >= 1000)) return;
+            // Check if a tool is selected and if the player has enough energy
+            if (!this.currentTool) return;
+            if (this.energy < this.currentToolEnergyCost) return;
+
             const col = Math.floor(pointer.worldX / this.tileSize);
             const row = Math.floor(pointer.worldY / this.tileSize);
 
@@ -67,15 +72,22 @@ export default class FarmScene extends Phaser.Scene {
             ) {
                 return;
             }
+
+            let success = false;
+
             switch(this.currentTool) {
                 case "hoe":
-                    this.grid.hoeTile(col, row);
+                    success = this.grid.hoeTile(col, row);
                     break; 
                 case "water":
-                    this.grid.waterTile(col, row);
+                    success = this.grid.waterTile(col, row);
                     break;
             }
-            
+
+            if(success) {
+                this.energy -= this.currentToolEnergyCost;
+                this.drawEnergyBar();
+            }
         });
         
         //Creates Energy bar system
