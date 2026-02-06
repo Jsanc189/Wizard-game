@@ -15,10 +15,7 @@ export default class FarmScene extends Phaser.Scene {
 
     create() {
         console.log("FarmScene started...");
-        this.input.setPollAlways();
-        this.tileSize = 16;
-        this.gridWidth = 29;
-        this.gridHeight = 100;
+        //creates toolbar
         this.currentTool = "water";
         const toolbarY = this.scale.height - 48;
         const allowedGrassFrames = [55,56,57,58,59];
@@ -29,12 +26,16 @@ export default class FarmScene extends Phaser.Scene {
             {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32},
             {bgTexture: "buttons", bgFrame: 6, tool: "axe", textureKey: "ui", frame: 1, width: 32}
         ]);
-
         this.events.on("tool-changed", (tool) => {
             this.currentTool = tool;
             console.log("Tool changed to:", tool);
         });
 
+        //creates tilemap and grid
+        this.input.setPollAlways();
+        this.tileSize = 16;
+        this.gridWidth = 29;
+        this.gridHeight = 100;
         this.grid = new Grid(
             this,
             0, 0, 
@@ -47,15 +48,15 @@ export default class FarmScene extends Phaser.Scene {
             allowedDirtFrames,
             allowedWateredDirtFrames
         )
-
         this.grid.enableHover();
 
         this.input.on("pointerup", () => {
             this.grid.clearHighlight();
-        });
 
-        //this.grid.enableHoeing();
+
+        });
         
+        //ties toolbar to grid interactions
         this.input.on("pointerdown", (pointer) => {
             const col = Math.floor(pointer.worldX / this.tileSize);
             const row = Math.floor(pointer.worldY / this.tileSize);
@@ -76,6 +77,62 @@ export default class FarmScene extends Phaser.Scene {
             }
             
         });
+        
+        //Creates Energy bar system
+        this.maxEnergy = 100;
+        this.energy = 100;
+        this.energyBarBG = this.add.graphics();
+        this.energyBarFill = this.add.graphics();
+        this.energyBarOutline = this.add.graphics();
+        this.energyBarBG.setDepth(1000);
+        this.energyBarFill.setDepth(1000);
+        this.energyBarOutline.setDepth(1000);
+        this.energyBarX = 20;
+        this.energyBarY = 20;
+        this.energyBarWidth = 200;
+        this.energyBarHeight = 20;
+        this.drawEnergyBar();
+
+        
+    }
+
+    drawEnergyBar() {
+        this.energyBarBG.clear();
+        this.energyBarFill.clear();
+        this.energyBarOutline.clear();
+
+        // Draw background
+        this.energyBarBG.fillStyle(0x222222, 1);
+        this.energyBarBG.fillRect(
+            this.energyBarX, 
+            this.energyBarY, 
+            this.energyBarWidth, 
+            this.energyBarHeight
+        );
+
+        //fill energy
+        const energyPercentage = Phaser.Math.Clamp(
+            this.energy / this.maxEnergy,
+            0,
+            1
+        );
+
+        this.energyBarFill.fillStyle(0x00cc66, 1);
+        this.energyBarFill.fillRect(
+            this.energyBarX, 
+            this.energyBarY, 
+            this.energyBarWidth * energyPercentage, 
+            this.energyBarHeight
+        );
+
+        // outline
+        this.energyBarOutline.lineStyle(2, 0xffffff, 1);
+        this.energyBarOutline.strokeRect(
+            this.energyBarX,
+            this.energyBarY,
+            this.energyBarWidth,
+            this.energyBarHeight
+        );
     }
 }
 
