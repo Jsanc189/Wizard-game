@@ -3,6 +3,8 @@ Date: 1/28/2026
 Description:  Grid prefab for creating a grid layout in the game scene.
 */
 
+import Plant from "./Plant.js";
+
 export default class Grid {
     constructor(scene, x, y, rows, cols, tileSize, 
                 grassTextureKey, dirtTextureKey, wateredTextureKey, 
@@ -49,7 +51,8 @@ export default class Grid {
                     tile,
                     plant:null,
                     isTilled:false,
-                    isWatered:false
+                    isWatered:false,
+                    plant: null
                 }
             }
         }
@@ -108,6 +111,20 @@ export default class Grid {
         return true;
     }
 
+    //plant a crop on the tile at (col, row)
+    plantTile(col, row, plantData) {
+        console.log("plantTile called:", col, row, plantData);
+        const tileData = this.getTile(col,row);
+        if(!tileData) return false;
+
+        if(!tileData.isTilled || tileData.plant) return false; // Must be tilled and empty to plant
+
+        const plant = new Plant(this.scene, tileData, plantData);
+        tileData.plant = plant;
+        return true;
+    }
+
+
     //highlights a tile at (col, row) with specified color and line width
     highlightTile(col,row, color = 0x000000, lineWidth = 2) {
         const tileData = this.getTile(col,row);
@@ -146,7 +163,20 @@ export default class Grid {
         });
     }
 
-
-
+    //updates tiles when day progresses
+    onNewDay() {
+        for(let i = 0; i < this.cols; i++) {
+            for(let j = 0; j < this.rows; j++) {
+                const tileData = this.grid[i][j];
+                if(tileData.plant) {
+                    tileData.plant.onNewDay();
+                }
+                tileData.isWatered = false;
+                if(tileData.isTilled) {
+                    this.hoeTile(i,j);
+                }
+            }
+        }
+    }
     
 }

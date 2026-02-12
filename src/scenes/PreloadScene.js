@@ -38,6 +38,17 @@ export default class PreloadScene extends Phaser.Scene {
             frameHeight: 16
         });
 
+        //Load Plant textures
+        this.load.spritesheet("crops", "./assets/plants/crops.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
+        this.load.spritesheet("seeds_crops", "./assets/plants/seeds_and_crops.png", {
+            frameWidth: 16,
+            frameHeight: 16
+        });
+
         //Load UI textures
         this.load.spritesheet("ui", "./assets/ui/tools_and_materials.png", {
             frameWidth: 16,
@@ -47,6 +58,11 @@ export default class PreloadScene extends Phaser.Scene {
         this.load.spritesheet("buttons", "./assets/ui/buttons_square.png", {
             frameWidth: 48,
             frameHeight: 48 
+        });
+
+        this.load.spritesheet("large_buttons", "./assets/ui/buttons_large.png", {
+            frameWidth: 96,
+            frameHeight: 32
         });
 
 

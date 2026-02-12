@@ -7,6 +7,7 @@ Art assets are made by cup Nooble https://cupnooble.itch.io/
 
 import Grid from "./prefabs/Grid.js";
 import ToolBar from "../ui/ToolBar.js";
+import Plant from "./prefabs/Plant.js";
 
 export default class FarmScene extends Phaser.Scene {
     constructor() {
@@ -18,9 +19,6 @@ export default class FarmScene extends Phaser.Scene {
         //creates toolbar
         this.currentTool = "water";
         const toolbarY = this.scale.height - 48;
-        const allowedGrassFrames = [55,56,57,58,59];
-        const allowedDirtFrames = [55,56,57,58,59];
-        const allowedWateredDirtFrames = [55,56,57,58,59];
         const toolBar = new ToolBar(this, 50, toolbarY, [
             {bgTexture: "buttons", bgFrame: 6, tool: "water", textureKey: "ui", frame: 0, width: 32, energyCost: 5},
             {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32, energyCost: 10},
@@ -37,6 +35,9 @@ export default class FarmScene extends Phaser.Scene {
         this.tileSize = 32;
         this.gridWidth = 29;
         this.gridHeight = 100;
+        const allowedGrassFrames = [55,56,57,58,59];
+        const allowedDirtFrames = [55,56,57,58,59];
+        const allowedWateredDirtFrames = [55,56,57,58,59];
         this.grid = new Grid(
             this,
             0, 0, 
@@ -82,29 +83,115 @@ export default class FarmScene extends Phaser.Scene {
                 case "water":
                     success = this.grid.waterTile(col, row);
                     break;
+                default:
+                    if (this.unlockedSeeds.includes(this.currentTool)) {
+                        success = this.grid.plantTile(col, row, this.PLANT_DATA[this.currentTool]);
+                    }
             }
 
             if(success) {
-                this.energy -= this.currentToolEnergyCost;
+                this.energy -= this.currentToolEnergyCost || this.PLANT_DATA[this.currentTool]?.seeds?.energyCost || 0;
                 this.drawEnergyBar();
             }
+
+        });
+
+        //plant seeding logic, growth, and harvesting
+        this.harvestedCrops = {};
+        this.unlockedSeeds = ["carrot"];
+        this.selectedSeed = null;
+        this.PLANT_DATA = {
+            carrot: {
+                key: "crops",
+                frames: [10, 11, 12, 13],
+                daysPerStage: 1,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "carrot", textureKey: "seeds_crops", frame: 4, width: 32, energyCost: 20}
+             },
+             cauliflower: {
+                key: "crops",
+                frames: [15, 16, 17, 18],
+                daysPerStage: 2
+            },
+            tomato: {
+                key: "crops",
+                frames: [20, 21, 22, 23],
+                daysPerStage: 3
+             },
+            eggplant: {
+                key: "crops",
+                frames: [25, 26, 27, 28],
+                daysPerStage: 4
+            },
+            tulip:{
+                key: "crops",
+                frames: [30, 31, 32, 33],
+                daysPerStage: 2
+            },
+            lettuce: {
+                key: "crops",
+                frames: [35, 36, 37, 38],
+                daysPerStage: 3
+            },
+            wheat: {
+                key: "crops",
+                frames: [40, 41, 42, 43],
+                daysPerStage: 4
+            },
+            pumpkin: {
+                key: "crops",
+                frames: [45, 46, 47, 48],
+                daysPerStage: 5
+            },
+            parsnip: {
+                key: "crops",
+                frames: [50, 51, 52, 53],
+                daysPerStage: 2
+            },
+            red_cabbage: {
+                key: "crops",
+                frames: [55, 56, 57, 58],
+                daysPerStage: 3
+            },
+            purple_yam: {
+                key: "crops",
+                frames: [60, 61, 62, 63],
+                daysPerStage: 4
+            }
+        };
+        this.createSeedBar();
+         
+
+        //UI buttons
+        this.endDayButton = this.add.image(
+            this.scale.width - 25,
+            16,
+            "large_buttons",
+            0
+        )
+        .setOrigin(1,0)
+        .setScrollFactor(0)
+        .setDepth(1001)
+        .setInteractive({useHandCursor: true});
+        
+        this.endDayButton.on("pointerdown", (pointer) => {
+            pointer.event.stopPropagation();
+            this.endDay();
         });
         
         //Creates Energy bar system
         this.maxEnergy = 100;
         this.energy = 100;
-        this.energyBarBG = this.add.graphics();
-        this.energyBarFill = this.add.graphics();
-        this.energyBarOutline = this.add.graphics();
-        this.energyBarBG.setDepth(1000);
-        this.energyBarFill.setDepth(1000);
-        this.energyBarOutline.setDepth(1000);
+        this.energyBarBG = this.add.graphics().setDepth(1000);
+        this.energyBarFill = this.add.graphics().setDepth(1000);
+        this.energyBarOutline = this.add.graphics().setDepth(1000);
         this.energyBarX = 20;
         this.energyBarY = 20;
         this.energyBarWidth = 200;
         this.energyBarHeight = 20;
         this.drawEnergyBar();
 
+        //Day/Night cycle
+        this.currentDay = 1;
         
     }
 
@@ -145,6 +232,42 @@ export default class FarmScene extends Phaser.Scene {
             this.energyBarWidth,
             this.energyBarHeight
         );
+    }
+
+    endDay() {
+        console.log("Day ended. Advancing plant growth stages...");
+        this.grid.onNewDay();
+        this.currentDay++;
+        this.energy = this.maxEnergy;
+        this.drawEnergyBar();
+        console.log("Current Day:", this.currentDay);
+    }
+
+    createSeedBar() {
+        const seedConfigs = this.unlockedSeeds.map(seedKey => {
+            return this.PLANT_DATA[seedKey].seeds;
+
+       });
+        
+        if (this.seedBar) this.seedBar.destroy();
+
+        this.seedBar = new ToolBar(this, 300, this.scale.height - 48, seedConfigs);
+
+        //listen for seed selection
+        this.events.on("tool-changed", (data) => {
+            if (this.unlockedSeeds.includes(data.tool)) {
+                this.selectedSeed = data.tool;
+                console.log("Selected seed:", this.selectedSeed);
+            }
+        });
+    }
+
+    //unlocks new seeds
+    unlockSeed(seedKey) {
+        if (!this.unlockedSeeds.includes(seedKey)) {
+            this.unlockedSeeds.push(seedKey);
+            this.createSeedBar();
+        }
     }
 }
 
