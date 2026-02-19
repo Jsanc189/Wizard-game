@@ -14,6 +14,7 @@ export default class Plant {
         }
 
         this.key = plantData.key;
+        this.cropType = plantData.cropType;
         this.frames = plantData.frames;
         this.daysPerStage = plantData.daysPerStage;
         this.currentStage = 0;

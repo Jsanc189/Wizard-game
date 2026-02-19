@@ -119,11 +119,29 @@ export default class Grid {
 
         if(!tileData.isTilled || tileData.plant) return false; // Must be tilled and empty to plant
 
-        const plant = new Plant(this.scene, tileData, plantData);
-        tileData.plant = plant;
+        tileData.plant = new Plant(
+            this.scene,
+            tileData,
+            plantData,
+            { type: this.scene.currentTool }
+        )
         return true;
     }
 
+    //harvest the crop on the tile at (col, row)
+    harvestTile(col, row) {
+        const tileData = this.getTile(col,row);
+        if(!tileData || !tileData.plant) return false;
+
+        const plant = tileData.plant;
+        if (!plant.isFullyGrown()) return false; 
+        const cropType = plant.cropType;
+        plant.destroy();
+        tileData.plant = null;
+        tileData.isWatered = false;
+
+        return cropType;
+    }
 
     //highlights a tile at (col, row) with specified color and line width
     highlightTile(col,row, color = 0x000000, lineWidth = 2) {

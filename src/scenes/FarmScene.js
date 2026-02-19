@@ -18,12 +18,15 @@ export default class FarmScene extends Phaser.Scene {
         console.log("FarmScene started...");
         //creates toolbar
         this.currentTool = "water";
-        const toolbarY = this.scale.height - 48;
-        const toolBar = new ToolBar(this, 50, toolbarY, [
+        const toolBarHorizontalX = 50;
+        const toolbarHorizontalY = this.scale.height - 48;
+        const toolBarVerticalX = 325;
+        const toolBarVerticalY = 75;
+        const toolBar = new ToolBar(this, toolBarHorizontalX, toolbarHorizontalY, [
             {bgTexture: "buttons", bgFrame: 6, tool: "water", textureKey: "ui", frame: 0, width: 32, energyCost: 5},
             {bgTexture: "buttons", bgFrame: 6, tool: "hoe", textureKey: "ui", frame: 2 , width: 32, energyCost: 10},
             {bgTexture: "buttons", bgFrame: 6, tool: "axe", textureKey: "ui", frame: 1, width: 32, energyCost: 15}
-        ]);
+        ], {direction: "horizontal", spacing: 0});
         this.events.on("tool-changed", (data) => {
             this.currentTool = data.tool;
             this.currentToolEnergyCost = data.energyCost;
@@ -75,22 +78,38 @@ export default class FarmScene extends Phaser.Scene {
             }
 
             let success = false;
+            let harvestResult = false;
+            const harvestedCrop = this.grid.harvestTile(col, row);
 
-            switch(this.currentTool) {
-                case "hoe":
-                    success = this.grid.hoeTile(col, row);
-                    break; 
-                case "water":
-                    success = this.grid.waterTile(col, row);
-                    break;
-                default:
-                    if (this.unlockedSeeds.includes(this.currentTool)) {
-                        success = this.grid.plantTile(col, row, this.PLANT_DATA[this.currentTool]);
-                    }
+            if(harvestedCrop) {
+                harvestResult = true;
+
+                if (!this.harvestedCrops[harvestedCrop]) {
+                    this.harvestedCrops[harvestedCrop] = 0;
+                }
+                this.harvestedCrops[harvestedCrop]++;
+                console.log(`Harvested ${harvestedCrop}. Total harvested: ${this.harvestedCrops[harvestedCrop]}`);
+            } else {
+                switch(this.currentTool) {
+                    case "hoe":
+                        success = this.grid.hoeTile(col, row);
+                        break; 
+                    case "water":
+                        success = this.grid.waterTile(col, row);
+                        break;
+                    default:
+                        if (this.unlockedSeeds.includes(this.currentTool)) {
+                            success = this.grid.plantTile(col, row, this.PLANT_DATA[this.currentTool]);
+                        }
+                }
             }
 
             if(success) {
                 this.energy -= this.currentToolEnergyCost || this.PLANT_DATA[this.currentTool]?.seeds?.energyCost || 0;
+                this.drawEnergyBar();
+            }
+            if(harvestResult) {
+                this.energy -= this.currentToolEnergyCost || 0;
                 this.drawEnergyBar();
             }
 
@@ -103,6 +122,7 @@ export default class FarmScene extends Phaser.Scene {
         this.PLANT_DATA = {
             carrot: {
                 key: "crops",
+                cropType: "carrot",
                 frames: [10, 11, 12, 13],
                 daysPerStage: 1,
                 seeds:{bgTexture: "buttons", bgFrame: 6, tool: "carrot", textureKey: "seeds_crops", frame: 4, width: 32, energyCost: 20}
@@ -158,13 +178,13 @@ export default class FarmScene extends Phaser.Scene {
                 daysPerStage: 4
             }
         };
-        this.createSeedBar();
+        this.createSeedBar(toolBarVerticalX, toolBarVerticalY);
          
 
         //UI buttons
         this.endDayButton = this.add.image(
-            this.scale.width - 25,
-            16,
+            this.scale.width - 15,
+            toolBarVerticalY - 60,
             "large_buttons",
             0
         )
@@ -243,7 +263,7 @@ export default class FarmScene extends Phaser.Scene {
         console.log("Current Day:", this.currentDay);
     }
 
-    createSeedBar() {
+    createSeedBar(x,y) {
         const seedConfigs = this.unlockedSeeds.map(seedKey => {
             return this.PLANT_DATA[seedKey].seeds;
 
@@ -251,7 +271,7 @@ export default class FarmScene extends Phaser.Scene {
         
         if (this.seedBar) this.seedBar.destroy();
 
-        this.seedBar = new ToolBar(this, 300, this.scale.height - 48, seedConfigs);
+        this.seedBar = new ToolBar(this, x, y, seedConfigs, {direction: "vertical", spacing: 0});
 
         //listen for seed selection
         this.events.on("tool-changed", (data) => {
