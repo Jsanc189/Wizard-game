@@ -11,6 +11,7 @@ export default class ToolBar {
         this.y = y;
         this.direction = options.direction || "horizontal";
         this.spacing = options.spacing || 16;
+        this.interactive = options.interactive ?? true;
         this.buttonsList = [];
         this.activeButton = null;
 
@@ -28,7 +29,7 @@ export default class ToolBar {
             } else {
                 y += index * (config.width + this.spacing);
             }
-            
+
 
 
             const bg = this.scene.add.image(0, 0, config.bgTexture, config.bgFrame)
@@ -52,6 +53,7 @@ export default class ToolBar {
                     Phaser.Geom.Rectangle.Contains
                 );
 
+            if (this.interactive) {
                 container.on("pointerdown", (pointer) => {
                     console.log(`${config.tool} button clicked`);
                     pointer.event.stopPropagation();
@@ -59,8 +61,9 @@ export default class ToolBar {
                     this.scene.events.emit("tool-changed",{
                          tool: config.tool,
                          energyCost: config.energyCost
+                    });
                 });
-            });
+            }
 
             this.buttonsList.push(container);
         });

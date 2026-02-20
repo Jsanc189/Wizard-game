@@ -17,7 +17,7 @@ export default class Plant {
         this.cropType = plantData.cropType;
         this.frames = plantData.frames;
         this.daysPerStage = plantData.daysPerStage;
-        this.currentStage = 0;
+        this.currentStage = 3;
         this.dayCounter = 0;
         this.maxStage = this.frames.length - 1;
 

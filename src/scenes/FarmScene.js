@@ -89,6 +89,7 @@ export default class FarmScene extends Phaser.Scene {
                 }
                 this.harvestedCrops[harvestedCrop]++;
                 console.log(`Harvested ${harvestedCrop}. Total harvested: ${this.harvestedCrops[harvestedCrop]}`);
+                this.createHarvestDisplay(toolBarVerticalX - 50, toolBarVerticalY);
             } else {
                 switch(this.currentTool) {
                     case "hoe":
@@ -179,6 +180,7 @@ export default class FarmScene extends Phaser.Scene {
             }
         };
         this.createSeedBar(toolBarVerticalX, toolBarVerticalY);
+        this.createHarvestDisplay(toolBarVerticalX - 50, toolBarVerticalY);
          
 
         //UI buttons
@@ -279,6 +281,43 @@ export default class FarmScene extends Phaser.Scene {
                 this.selectedSeed = data.tool;
                 console.log("Selected seed:", this.selectedSeed);
             }
+        });
+    }
+
+    createHarvestDisplay(x, y) {
+        const cropKeys = Object.keys(this.harvestedCrops);
+        const harvestConfigs = cropKeys.map((cropKey, index) => {
+            const z = index + 1; // ✅ first crop = 1, second = 2, etc
+            const baseFrame = this.PLANT_DATA[cropKey].frames[0];
+            const displayFrame = baseFrame - (2 + 3 * z);
+
+            return {
+                bgTexture: "buttons",
+                bgFrame: 6,
+                tool: cropKey,
+                textureKey: "seeds_crops",
+                frame: displayFrame,
+                width: 32,
+                energyCost: 0,
+                amount: this.harvestedCrops[cropKey]
+            };
+        });
+
+        if (this.harvestDisplay) this.harvestDisplay.destroy();
+
+        this.harvestDisplay = new ToolBar(this, x, y, harvestConfigs, {direction: "vertical", spacing: 0, interactive: false});
+
+        this.harvestDisplay.buttonsList.forEach((container, index) => { 
+            const cropKey = Object.keys(this.harvestedCrops)[index];
+            const amount = this.harvestedCrops[cropKey];
+            const text = this.add.text(
+                container.width - 70,
+                container.height / 10, 
+                `x${amount}`, 
+                { fontSize: '16px', fill: '#fff' })
+                .setOrigin(0, 0.5)
+                .setDepth(1001);
+            container.add(text);
         });
     }
 
