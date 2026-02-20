@@ -113,18 +113,21 @@ export default class Grid {
 
     //plant a crop on the tile at (col, row)
     plantTile(col, row, plantData) {
-        console.log("plantTile called:", col, row, plantData);
+
         const tileData = this.getTile(col,row);
         if(!tileData) return false;
 
         if(!tileData.isTilled || tileData.plant) return false; // Must be tilled and empty to plant
+        console.log("plantTile called:", col, row, plantData);
 
         tileData.plant = new Plant(
             this.scene,
             tileData,
             plantData,
-            { type: this.scene.currentTool }
+            //{ type: this.scene.currentTool }
         )
+
+        console.log(tileData.plant);
         return true;
     }
 

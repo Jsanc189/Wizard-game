@@ -88,6 +88,7 @@ export default class FarmScene extends Phaser.Scene {
                     this.harvestedCrops[harvestedCrop] = 0;
                 }
                 this.harvestedCrops[harvestedCrop]++;
+                this.checkCropProgression(harvestedCrop, toolBarVerticalX, toolBarVerticalY);
                 console.log(`Harvested ${harvestedCrop}. Total harvested: ${this.harvestedCrops[harvestedCrop]}`);
                 this.createHarvestDisplay(toolBarVerticalX - 50, toolBarVerticalY);
             } else {
@@ -126,57 +127,77 @@ export default class FarmScene extends Phaser.Scene {
                 cropType: "carrot",
                 frames: [10, 11, 12, 13],
                 daysPerStage: 1,
-                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "carrot", textureKey: "seeds_crops", frame: 4, width: 32, energyCost: 20}
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "carrot", textureKey: "seeds_crops", frame: 4, width: 32, energyCost: 5}
              },
              cauliflower: {
                 key: "crops",
+                cropType: "cauliflower",
                 frames: [15, 16, 17, 18],
-                daysPerStage: 2
+                daysPerStage: 1,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "cauliflower", textureKey: "seeds_crops", frame: 6, width: 32, energyCost: 5}
             },
             tomato: {
                 key: "crops",
+                cropType: "tomato",
                 frames: [20, 21, 22, 23],
-                daysPerStage: 3
+                daysPerStage: 3,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "tomato", textureKey: "seeds_crops", frame: 8, width: 32, energyCost: 5}
              },
             eggplant: {
                 key: "crops",
+                cropType: "eggplant",
                 frames: [25, 26, 27, 28],
-                daysPerStage: 4
+                daysPerStage: 4,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "eggplant", textureKey: "seeds_crops", frame: 10, width: 32, energyCost: 5}
             },
             tulip:{
                 key: "crops",
+                cropType: "tulip",
                 frames: [30, 31, 32, 33],
-                daysPerStage: 2
+                daysPerStage: 2,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "tulip", textureKey: "seeds_crops", frame: 12, width: 32, energyCost: 5}
             },
             lettuce: {
                 key: "crops",
+                cropType: "lettuce",
                 frames: [35, 36, 37, 38],
-                daysPerStage: 3
+                daysPerStage: 3,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "lettuce", textureKey: "seeds_crops", frame: 14, width: 32, energyCost: 5}
             },
             wheat: {
                 key: "crops",
+                cropType: "wheat",
                 frames: [40, 41, 42, 43],
-                daysPerStage: 4
+                daysPerStage: 4,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "wheat", textureKey: "seeds_crops", frame: 16, width: 32, energyCost: 5}
             },
             pumpkin: {
                 key: "crops",
+                cropType: "pumpkin",
                 frames: [45, 46, 47, 48],
-                daysPerStage: 5
+                daysPerStage: 5,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "pumpkin", textureKey: "seeds_crops", frame: 18, width: 32, energyCost: 5}
             },
             parsnip: {
                 key: "crops",
+                cropType: "parsnip",
                 frames: [50, 51, 52, 53],
-                daysPerStage: 2
+                daysPerStage: 2,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "parsnip", textureKey: "seeds_crops", frame: 20, width: 32, energyCost: 5}
             },
             red_cabbage: {
                 key: "crops",
+                cropType: "red_cabbage",
                 frames: [55, 56, 57, 58],
-                daysPerStage: 3
+                daysPerStage: 3,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "red_cabbage", textureKey: "seeds_crops", frame: 22, width: 32, energyCost: 5}
             },
             purple_yam: {
                 key: "crops",
+                cropType: "purple_yam",
                 frames: [60, 61, 62, 63],
-                daysPerStage: 4
+                daysPerStage: 4,
+                seeds:{bgTexture: "buttons", bgFrame: 6, tool: "purple_yam", textureKey: "seeds_crops", frame: 24, width: 32, energyCost: 5}
             }
         };
         this.createSeedBar(toolBarVerticalX, toolBarVerticalY);
@@ -322,11 +343,31 @@ export default class FarmScene extends Phaser.Scene {
     }
 
     //unlocks new seeds
-    unlockSeed(seedKey) {
+    unlockSeed(seedKey, x, y) {
         if (!this.unlockedSeeds.includes(seedKey)) {
             this.unlockedSeeds.push(seedKey);
-            this.createSeedBar();
+            this.createSeedBar(x, y);
+            console.log('current seeds: ', this.unlockedSeeds);
         }
+    }
+
+    //check if has met requirements to unluck new seeds
+    checkCropProgression(cropKey, x, y) {
+        const harvestedAmount = this.harvestedCrops[cropKey];
+
+        if (harvestedAmount < 2) return;
+
+        const plantKeys = Object.keys(this.PLANT_DATA);
+        const currentIndex = plantKeys.indexOf(cropKey);
+
+        console.log(`Checking crop progression for ${cropKey}. Harvested amount: ${harvestedAmount}. Current index: ${currentIndex}`);
+
+        //last crop or not found, no more seeds to unlock
+        if (currentIndex === -1 || currentIndex === plantKeys.length - 1) return;
+
+        const nextSeedKey = plantKeys[currentIndex + 1];
+        console.log(`Unlocking new seed: ${nextSeedKey}`);
+        this.unlockSeed(nextSeedKey, x, y);
     }
 }
 
